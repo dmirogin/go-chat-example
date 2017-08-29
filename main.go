@@ -12,6 +12,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Echo server
 func echo (w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -34,7 +35,15 @@ func echo (w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Client entry point
+func client (w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
+
 func main() {
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	http.HandleFunc("/echo", echo)
+	http.HandleFunc("/", client)
+
 	log.Fatal(http.ListenAndServe("localhost:3000", nil))
 }

@@ -1,0 +1,19 @@
+#root {
+    margin-top: 40px;
+    border: 1px solid black;
+    border-radius: 3px;
+    max-width: 600px;
+}
+
+.message {
+    margin: 10px 0;
+    border-bottom: 1px solid black;
+}
+
+.message .author {
+    font-weight: bold;
+}
+
+.message .text {
+    margin-left: 15px;
+}
