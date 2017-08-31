@@ -27,28 +27,29 @@ new Vue({
         let socket = new WebSocket("ws://localhost:3000/echo");
 
         socket.onopen = function() {
-            console.log("Соединение установлено.");
+            console.log("Connection established.");
         };
 
         socket.onclose = function(event) {
             if (event.wasClean) {
-                console.log('Соединение закрыто чисто');
+                console.log('Clean close');
             } else {
-                console.log('Обрыв соединения'); // например, "убит" процесс сервера
+                console.log('Break connection'); // for example, server stopped connection
             }
             console.log('Код: ' + event.code + ' причина: ' + event.reason);
         };
 
         socket.onmessage = (event) => {
-            console.log("Получены данные " + event.data);
+            console.log("Received data", event.data);
+            let data = JSON.parse(event.data);
             this.$data.messages.push({
-                author: 'Client 1',
-                text: event.data
+                author: 'Client ' + data.author,
+                text: data.text
             });
         };
 
         socket.onerror = function(error) {
-            console.log("Ошибка " + error.message);
+            console.log("Error " + error.message);
         };
 
         this.$data.socket = socket;

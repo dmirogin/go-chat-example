@@ -4,17 +4,22 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
+	"encoding/json"
 )
 
 type (
+	TextMessage struct {
+		Author int `json:"author"`
+		Text string `json:"text"`
+	}
 	Client struct {
 		id int
 		conn *websocket.Conn
-		send chan []byte
+		send chan *TextMessage
 	}
 	Hub struct {
 		clients map [int]*Client
-		messages chan []byte
+		messages chan *TextMessage
 		register chan *Client
 		unregister chan *Client
 	}
@@ -45,7 +50,7 @@ func ChatHandler (hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{nextInt(), conn, make(chan []byte)}
+	client := &Client{nextInt(), conn, make(chan *TextMessage)}
 	hub.register<-client
 
 	// client read
@@ -63,7 +68,7 @@ func ChatHandler (hub *Hub, w http.ResponseWriter, r *http.Request) {
 				break
 			}
 
-			hub.messages<-message
+			hub.messages<-&TextMessage{client.id, string(message)}
 		}
 	}(hub, conn)
 
@@ -83,7 +88,8 @@ func ChatHandler (hub *Hub, w http.ResponseWriter, r *http.Request) {
 						return
 					}
 
-					w.Write(message)
+					data, _ := json.Marshal(message)
+					w.Write(data)
 
 					if err := w.Close(); err != nil {
 						return
@@ -98,7 +104,7 @@ func (hub *Hub) route() {
 	for {
 		select {
 			case message := <- hub.messages:
-				log.Println("Got message", message)
+				log.Println("Got message", message.Text)
 				for _, client := range hub.clients {
 					client.send<-message
 				}
@@ -120,7 +126,7 @@ func IndexHandler (w http.ResponseWriter, r *http.Request) {
 func main() {
 	hub := &Hub{
 		make(map[int]*Client),
-		make(chan []byte),
+		make(chan *TextMessage),
 		make(chan *Client),
 		make(chan *Client),
 	}
