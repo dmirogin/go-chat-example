@@ -1,5 +1,3 @@
-
-
 new Vue({
     el: '#root',
     data: {
@@ -24,7 +22,7 @@ new Vue({
         }
     },
     created() {
-        let socket = new WebSocket("ws://localhost:3000/echo");
+        let socket = new WebSocket('ws://' + document.location.host + '/ws');
 
         socket.onopen = function() {
             console.log("Connection established.");
@@ -36,7 +34,7 @@ new Vue({
             } else {
                 console.log('Break connection'); // for example, server stopped connection
             }
-            console.log('Код: ' + event.code + ' причина: ' + event.reason);
+            console.log('Errore code: ' + event.code + ' reason: ' + event.reason);
         };
 
         socket.onmessage = (event) => {
