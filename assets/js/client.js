@@ -51,5 +51,29 @@ new Vue({
         };
 
         this.$data.socket = socket;
+
+
+        const eventSource = new EventSource("/sse");
+
+        eventSource.onopen = function(e) {
+            console.log("Соединение открыто");
+        };
+
+        eventSource.onerror = function(e) {
+            if (this.readyState == EventSource.CONNECTING) {
+                console.log("Соединение порвалось, пересоединяемся...");
+            } else {
+                console.log("Ошибка, состояние: " + this.readyState);
+            }
+        };
+
+        eventSource.onmessage = function(e) {
+            console.log("Пришли данные: " + e.data);
+        };
+
+        eventSource.addEventListener('time', function(e) {
+            console.log('Пришёл ' + e.data );
+        });
+
     }
 });
