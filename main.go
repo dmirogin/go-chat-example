@@ -14,10 +14,11 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+	hub = NewHub()
 )
 
 // Chat websocket handler
-func ChatHandler (hub *Hub, w http.ResponseWriter, r *http.Request) {
+func ChatHandler (w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -39,14 +40,11 @@ func IndexHandler (w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	hub := NewHub()
 	go hub.Run()
 
 	http.HandleFunc("/", IndexHandler)
 
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ChatHandler(hub, w, r)
-	})
+	http.HandleFunc("/ws", ChatHandler)
 
 	// File Server
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
