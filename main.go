@@ -2,10 +2,13 @@ package main
 
 import (
 	"net/http"
-	"github.com/gorilla/websocket"
 	"log"
 	"flag"
 	"strconv"
+	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/gotvitch/go-sse"
 )
 
 var (
@@ -53,6 +56,24 @@ func main() {
 
 	// File Server
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+
+	http.HandleFunc("/sse", func(w http.ResponseWriter, r *http.Request) {
+		sseConnection, err := sse.Upgrade(w, r, sse.DefaultOptions)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for {
+			select {
+			case <-time.After(time.Second):
+				sseConnection.Send("time", time.Now())
+			case <-sseConnection.Closed:
+				return
+			}
+		}
+	})
 
 	log.Fatal(http.ListenAndServe("localhost:" + strconv.Itoa(*websocketPortPointer), nil))
 }
