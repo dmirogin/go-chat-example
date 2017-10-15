@@ -14,6 +14,8 @@ type (
 func (hub *Hub) Run() {
 	for {
 		select {
+			// Read all input message
+			// And set it to all registered clients
 			case message := <- hub.messages:
 				log.Println("Got message", message.Text)
 				for _, client := range hub.clients {
