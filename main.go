@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	// Declare a port which will be used for server listening
 	websocketPortPointer = flag.Int("port", 3000, "Port which will be used by websocket")
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
